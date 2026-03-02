@@ -18,16 +18,17 @@
         body {
             background: var(--bg); color: var(--text);
             font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s;
+            overflow-x: hidden;
         }
 
-        /* Навігація - ВИПРАВЛЕНО КОЛІР */
+        /* Навігація */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--nav-bg); backdrop-filter: blur(20px);
             display: flex; justify-content: space-around; padding: 12px 0 35px; 
             border-top: 1px solid rgba(142, 142, 147, 0.2); z-index: 1000;
         }
-        .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; flex: 1; }
+        .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; flex: 1; transition: 0.2s; }
         .nav-item.active { color: var(--accent); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
 
@@ -38,13 +39,13 @@
         /* Профіль */
         .profile-card { text-align: center; margin-bottom: 20px; }
         .u-avatar { 
-            width: 90px; height: 90px; border-radius: 50%; background: var(--accent);
+            width: 100px; height: 100px; border-radius: 50%; background: var(--accent);
             margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: bold; color: white; border: 4px solid var(--accent);
-            overflow: hidden;
+            font-size: 36px; font-weight: bold; color: white; border: 4px solid var(--accent);
+            overflow: hidden; box-shadow: 0 10px 20px rgba(52, 199, 89, 0.2);
         }
         .u-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .u-badge { background: var(--accent); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-top: 5px; }
+        .u-badge { background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; display: inline-block; margin-top: 8px; font-weight: bold; }
 
         .glass-card {
             background: var(--card); border-radius: 22px; padding: 18px;
@@ -52,83 +53,114 @@
         }
 
         /* XP Бар */
-        .xp-box { margin-top: 10px; }
-        .xp-line { width: 100%; height: 10px; background: rgba(142,142,147,0.2); border-radius: 10px; overflow: hidden; }
-        .xp-fill { width: 35%; height: 100%; background: var(--accent); transition: 0.5s; }
+        .xp-line { width: 100%; height: 10px; background: rgba(142,142,147,0.2); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .xp-fill { width: 35%; height: 100%; background: var(--accent); transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* Досягнення - СІРІ */
-        .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        /* Досягнення */
+        .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .ach-card { 
-            background: var(--card); padding: 15px 5px; border-radius: 15px; text-align: center;
-            filter: grayscale(1); opacity: 0.4; border: 1px solid rgba(142,142,147,0.1); transition: 0.3s;
+            background: var(--card); padding: 15px 5px; border-radius: 18px; text-align: center;
+            filter: grayscale(1); opacity: 0.4; border: 1px solid rgba(142,142,147,0.1); transition: 0.4s;
         }
-        .ach-card.unlocked { filter: grayscale(0); opacity: 1; border-color: var(--accent); }
-        .ach-card i { font-size: 24px; color: #FFD700; }
-        .ach-card span { display: block; font-size: 10px; margin-top: 5px; }
+        .ach-card.unlocked { filter: grayscale(0); opacity: 1; border-color: var(--accent); transform: scale(1.05); }
+        .ach-card i { font-size: 30px; color: #FFD700; margin-bottom: 8px; }
+        .ach-card span { display: block; font-size: 10px; font-weight: bold; }
 
-        /* Кнопки налаштувань */
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; }
+        /* Кнопки */
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .s-btn { 
-            flex: 1; padding: 12px; border-radius: 12px; border: none; 
-            background: rgba(142, 142, 147, 0.1); color: var(--text); cursor: pointer;
+            flex: 1; padding: 14px; border-radius: 15px; border: none; 
+            background: rgba(142, 142, 147, 0.15); color: var(--text); font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .s-btn.active { background: var(--accent) !important; color: white !important; font-weight: bold; }
+        .s-btn.active { background: var(--accent) !important; color: white !important; }
+        .s-btn:active { transform: scale(0.95); }
 
-        /* Спливаюча підказка */
-        #hint { 
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 10px 20px; border-radius: 30px;
-            font-size: 13px; display: none; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        /* Підказка */
+        #hint-box { 
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: white; padding: 12px 25px; border-radius: 30px;
+            font-size: 14px; font-weight: bold; display: none; z-index: 2000; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
+
+        /* Адмін Панель */
+        .admin-item { margin-bottom: 15px; }
+        .admin-item label { font-size: 12px; color: var(--subtext); display: block; margin-bottom: 5px; }
+        .danger-btn { background: #ff3b30 !important; color: white !important; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body class="dark-theme">
 
-    <div id="hint">Підказка</div>
+    <div id="hint-box">Підказка</div>
 
-    <div id="p-main" class="page active">
+    <div id="p-home" class="page active">
         <div class="profile-card">
             <div id="user-pic" class="u-avatar">?</div>
             <h2 id="user-name" style="margin:5px 0;">Вітаємо!</h2>
-            <div id="user-nick" style="color:var(--accent); font-size: 14px; font-weight: bold;">@loading</div>
+            <div id="user-nick" style="color:var(--accent); font-size: 14px; font-weight: bold; opacity: 0.8;">@username</div>
             <div id="user-rank" class="u-badge">Ранг: Учень</div>
         </div>
 
         <div class="glass-card">
-            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800;">
                 <span id="txt-lvl">Рівень 3</span>
-                <span>350 / 1000 XP</span>
+                <span id="txt-xp-num">350 / 1000 XP</span>
             </div>
-            <div class="xp-line"><div class="xp-fill"></div></div>
+            <div class="xp-line"><div class="xp-fill" id="xp-bar-fill"></div></div>
         </div>
 
         <div class="glass-card">
-            <h3 id="txt-news"><i class="fas fa-bullhorn"></i> Новини</h3>
-            <p style="color:var(--subtext); font-size: 14px;">Додаток успішно оновлено! Додано систему досягнень.</p>
+            <h3 id="txt-news"><i class="fas fa-bolt" style="color: #ffcc00;"></i> Статус системи</h3>
+            <p style="color:var(--subtext); font-size: 14px; line-height: 1.4;">Всі модулі працюють стабільно. Адмін-права активовані для розробника.</p>
         </div>
     </div>
 
     <div id="p-ach" class="page">
         <h2 id="tit-ach">Досягнення</h2>
         <div class="ach-grid">
-            <div class="ach-card unlocked" onclick="tip('Ти відкрив додаток! Молодець!')">
-                <i class="fas fa-check-circle"></i><span id="a1">Перший крок</span>
+            <div class="ach-card unlocked" onclick="showTip('Вітаємо у Study UA! Ви зробили перший крок.')">
+                <i class="fas fa-medal"></i><span id="a1">Новачок</span>
             </div>
-            <div class="ach-card" onclick="tip('Отримай оцінку 12 у Classroom')">
-                <i class="fas fa-star"></i><span id="a2">Відмінник</span>
+            <div class="ach-card" onclick="showTip('Отримай оцінку 12 у Classroom для активації')">
+                <i class="fas fa-graduation-cap"></i><span id="a2">Магістр</span>
             </div>
-            <div class="ach-card" onclick="tip('Набери 1000 очок у Змійці')">
-                <i class="fas fa-snake"></i><span id="a3">Змієлов</span>
+            <div class="ach-card" onclick="showTip('Набери 500 очок у Змійці без помилок')">
+                <i class="fas fa-snake"></i><span id="a3">Мисливець</span>
             </div>
-            <div class="ach-card" onclick="tip('Зміни мову 5 разів за хвилину')">
-                <i class="fas fa-language"></i><span id="a4">Поліглот</span>
+            <div class="ach-card" onclick="showTip('Заходь у додаток 7 днів поспіль')">
+                <i class="fas fa-fire"></i><span id="a4">Активіст</span>
             </div>
-            <div class="ach-card" onclick="tip('Заходь у додаток 7 днів поспіль')">
-                <i class="fas fa-fire"></i><span id="a5">У вогні</span>
+            <div class="ach-card" onclick="showTip('Зміни мову та тему 10 разів')">
+                <i class="fas fa-magic"></i><span id="a5">Тестувальник</span>
             </div>
-            <div class="ach-card" onclick="tip('Виконай 10 домашніх завдань')">
-                <i class="fas fa-book"></i><span id="a6">Ботанік</span>
+            <div class="ach-card" onclick="showTip('Виконай всі ДЗ за один вечір')">
+                <i class="fas fa-brain"></i><span id="a6">Геній</span>
             </div>
+        </div>
+    </div>
+
+    <div id="p-admin" class="page">
+        <h2 style="color: #ff3b30;"><i class="fas fa-user-shield"></i> Admin Panel</h2>
+        
+        <div class="glass-card">
+            <div class="admin-item">
+                <label>Редагувати досвід (XP)</label>
+                <input type="range" min="0" max="1000" value="350" style="width:100%; accent-color: var(--accent);" oninput="adminSetXP(this.value)">
+                <div style="text-align:right; font-weight:bold;" id="admin-xp-val">350 XP</div>
+            </div>
+            <button class="s-btn" onclick="adminSetRank('Легенда')">Видати ранг: Легенда</button>
+        </div>
+
+        <div class="glass-card">
+            <h4>Керування доступом</h4>
+            <button class="s-btn" onclick="adminShowData()">Подивитися дані TG</button>
+            <button class="s-btn" onclick="adminHistory()">Історія сесії</button>
+            <button class="s-btn danger-btn" onclick="adminBan()">БЛОКУВАТИ КОРИСТУВАЧА</button>
+        </div>
+
+        <div class="glass-card">
+            <h4>Додаткові інструменти</h4>
+            <button class="s-btn" onclick="tg.HapticFeedback.impactOccurred('heavy')">Тест вібрації</button>
+            <button class="s-btn" onclick="location.reload(true)">Очистити кеш та оновити</button>
         </div>
     </div>
 
@@ -137,46 +169,53 @@
         <div class="glass-card">
             <h4 id="lab-lang">Мова</h4>
             <div class="btn-group">
-                <button id="l-uk" class="s-btn active" onclick="setL('uk')">UA</button>
-                <button id="l-ru" class="s-btn" onclick="setL('ru')">RU</button>
-                <button id="l-en" class="s-btn" onclick="setL('en')">EN</button>
+                <button id="l-uk" class="s-btn active" onclick="setLang('uk')">UA</button>
+                <button id="l-ru" class="s-btn" onclick="setLang('ru')">RU</button>
+                <button id="l-en" class="s-btn" onclick="setLang('en')">EN</button>
             </div>
         </div>
         <div class="glass-card">
-            <h4 id="lab-theme">Тема</h4>
+            <h4 id="lab-theme">Тема застосунку</h4>
             <div class="btn-group">
-                <button id="t-dark" class="s-btn active" onclick="setT('dark')">Dark</button>
-                <button id="t-light" class="s-btn" onclick="setT('light')">Light</button>
+                <button id="t-dark" class="s-btn active" onclick="setTheme('dark')">Dark</button>
+                <button id="t-light" class="s-btn" onclick="setTheme('light')">Light</button>
             </div>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active" onclick="nav('p-main', this)"><i class="fas fa-user"></i><br><span id="n1">Профіль</span></a>
+        <a href="#" class="nav-item active" onclick="nav('p-home', this)"><i class="fas fa-user-circle"></i><br><span id="n1">Профіль</span></a>
         <a href="#" class="nav-item" onclick="nav('p-ach', this)"><i class="fas fa-trophy"></i><br><span id="n2">Успіхи</span></a>
-        <a href="#" class="nav-item" onclick="nav('p-set', this)"><i class="fas fa-cog"></i><br><span id="n3">Опції</span></a>
+        <a href="#" class="nav-item" id="nav-admin-btn" style="display:none;" onclick="nav('p-admin', this)"><i class="fas fa-shield-alt"></i><br><span>Адмін</span></a>
+        <a href="#" class="nav-item" onclick="nav('p-set', this)"><i class="fas fa-sliders-h"></i><br><span id="n3">Опції</span></a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. ПІДТЯГУЄМО ДАНІ ТЕЛЕГРАМ
-        function loadTg() {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        // 1. ЗАВАНТАЖЕННЯ ДАНИХ
+        function initApp() {
+            // Перевірка ролі (Адмін)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('role') === 'admin') {
+                document.getElementById('nav-admin-btn').style.display = 'block';
+            }
+
+            if (tg.initDataUnsafe?.user) {
                 const u = tg.initDataUnsafe.user;
-                document.getElementById('user-name').innerText = u.first_name || "Користувач";
+                document.getElementById('user-name').innerText = u.first_name;
                 document.getElementById('user-nick').innerText = u.username ? "@" + u.username : "";
                 
                 const box = document.getElementById('user-pic');
                 if (u.photo_url) {
                     box.innerHTML = `<img src="${u.photo_url}">`;
                 } else {
-                    box.innerText = u.first_name ? u.first_name[0] : "?";
+                    box.innerText = u.first_name[0];
                 }
             }
         }
-        loadTg();
+        initApp();
 
         // 2. НАВІГАЦІЯ
         function nav(id, el) {
@@ -184,33 +223,34 @@
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
+            tg.HapticFeedback.selectionChanged();
         }
 
         // 3. МОВА
-        const langData = {
-            uk: { n1:"Профіль", n2:"Успіхи", n3:"Опції", lvl:"Рівень 3", rank:"Ранг: Учень", news:"Новини", set:"Налаштування", lang:"Мова", theme:"Тема" },
-            ru: { n1:"Профиль", n2:"Успехи", n3:"Опции", lvl:"Уровень 3", rank:"Ранг: Ученик", news:"Новости", set:"Настройки", lang:"Язык", theme:"Тема" },
-            en: { n1:"Profile", n2:"Trophies", n3:"Options", lvl:"Level 3", rank:"Rank: Student", news:"News", set:"Settings", lang:"Language", theme:"Theme" }
+        const translations = {
+            uk: { n1:"Профіль", n2:"Успіхи", n3:"Опції", lvl:"Рівень 3", rank:"Ранг: Учень", set:"Налаштування", lang:"Мова", theme:"Тема застосунку" },
+            ru: { n1:"Профиль", n2:"Успехи", n3:"Опции", lvl:"Уровень 3", rank:"Ранг: Ученик", set:"Настройки", lang:"Язык", theme:"Тема приложения" },
+            en: { n1:"Profile", n2:"Trophies", n3:"Options", lvl:"Level 3", rank:"Rank: Student", set:"Settings", lang:"Language", theme:"App Theme" }
         };
 
-        function setL(l) {
-            const d = langData[l];
+        function setLang(l) {
+            const d = translations[l];
             document.getElementById('n1').innerText = d.n1;
             document.getElementById('n2').innerText = d.n2;
             document.getElementById('n3').innerText = d.n3;
             document.getElementById('txt-lvl').innerText = d.lvl;
             document.getElementById('user-rank').innerText = d.rank;
-            document.getElementById('txt-news').innerHTML = `<i class="fas fa-bullhorn"></i> ${d.news}`;
             document.getElementById('tit-set').innerText = d.set;
             document.getElementById('lab-lang').innerText = d.lang;
             document.getElementById('lab-theme').innerText = d.theme;
 
             document.querySelectorAll('[id^="l-"]').forEach(b => b.classList.remove('active'));
             document.getElementById('l-' + l).classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         // 4. ТЕМА
-        function setT(t) {
+        function setTheme(t) {
             document.body.className = t + '-theme';
             document.querySelectorAll('[id^="t-"]').forEach(b => b.classList.remove('active'));
             document.getElementById('t-' + t).classList.add('active');
@@ -218,11 +258,38 @@
         }
 
         // 5. ПІДКАЗКИ
-        function tip(txt) {
-            const h = document.getElementById('hint');
+        function showTip(txt) {
+            const h = document.getElementById('hint-box');
             h.innerText = txt;
             h.style.display = 'block';
-            setTimeout(() => h.style.display = 'none', 2500);
+            setTimeout(() => h.style.display = 'none', 3000);
+        }
+
+        // 6. АДМІН ФУНКЦІЇ
+        function adminSetXP(v) {
+            document.getElementById('admin-xp-val').innerText = v + " XP";
+            document.getElementById('txt-xp-num').innerText = v + " / 1000 XP";
+            document.getElementById('xp-bar-fill').style.width = (v / 10) + "%";
+        }
+
+        function adminSetRank(r) {
+            document.getElementById('user-rank').innerText = "Ранг: " + r;
+            tg.HapticFeedback.notificationOccurred('success');
+            showTip("Ранг змінено на: " + r);
+        }
+
+        function adminShowData() {
+            alert("Raw Data:\n" + JSON.stringify(tg.initDataUnsafe.user, null, 2));
+        }
+
+        function adminHistory() {
+            alert("Історія додатка:\n- Запуск: OK\n- Auth: Admin\n- Platform: " + tg.platform);
+        }
+
+        function adminBan() {
+            if(confirm("Ви дійсно хочете заблокувати доступ?")) {
+                document.body.innerHTML = "<div style='display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column;'><h1>🚫 Доступ обмежено</h1><p>Ваш акаунт заблоковано адміністратором.</p></div>";
+            }
         }
     </script>
 </body>
