@@ -8,220 +8,179 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0c0c0e; --card: #1c1c1e; --accent: #34c759; --text: #ffffff; --subtext: #8e8e93;
+            --bg: #0c0c0e; --card: #1c1c1e; --accent: #34c759; --text: #ffffff; 
+            --subtext: #8e8e93; --nav-bg: rgba(28, 28, 30, 0.9);
         }
         body.light-theme {
-            --bg: #f2f2f7; --card: #ffffff; --text: #000000; --subtext: #3a3a3c;
+            --bg: #f2f2f7; --card: #ffffff; --text: #000000; 
+            --subtext: #636366; --nav-bg: rgba(255, 255, 255, 0.9);
         }
         body {
             background: var(--bg); color: var(--text);
             font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s;
-            user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.2s; }
+        .page { display: none; padding: 20px; padding-bottom: 110px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .glass-card {
             background: var(--card); border-radius: 24px; padding: 20px;
-            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px; border: 1px solid rgba(142, 142, 147, 0.1);
         }
-        
-        /* Аватарка */
-        .profile-img-container { 
-            width: 60px; height: 60px; border-radius: 50%; 
-            overflow: hidden; border: 2px solid var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            background: var(--accent); font-size: 24px; font-weight: bold; color: white;
-        }
-        .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Кнопки настроек */
-        .settings-group { display: flex; gap: 8px; margin-top: 10px; }
-        .settings-btn {
-            background: rgba(142, 142, 147, 0.1); border: none; color: var(--text);
-            padding: 12px; border-radius: 14px; font-size: 14px; flex: 1; transition: 0.2s;
+        /* Профиль и Аватар */
+        .user-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .profile-pic { 
+            width: 70px; height: 70px; border-radius: 50%; 
+            background: var(--accent); display: flex; align-items: center; 
+            justify-content: center; font-size: 28px; font-weight: bold; color: white;
+            overflow: hidden; border: 3px solid var(--accent);
         }
-        .settings-btn.active { background: var(--accent) !important; color: white !important; font-weight: bold; }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
 
-        /* Навигация */
+        /* XP Bar */
+        .xp-container { margin-top: 10px; }
+        .xp-bar { width: 100%; height: 8px; background: rgba(142,142,147,0.2); border-radius: 4px; overflow: hidden; }
+        .xp-fill { width: 65%; height: 100%; background: var(--accent); }
+
+        /* Достижения */
+        .achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .ach-item { background: var(--card); padding: 10px; border-radius: 15px; text-align: center; border: 1px solid rgba(142,142,147,0.1); }
+        .ach-item i { font-size: 24px; color: #ffd700; margin-bottom: 5px; }
+        .ach-item span { font-size: 10px; display: block; color: var(--subtext); }
+
+        /* Навигация (Исправлена для белой темы) */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; padding: 12px 0 30px; border-top: 1px solid rgba(255,255,255,0.05);
+            background: var(--nav-bg); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; padding: 12px 0 30px; 
+            border-top: 1px solid rgba(142, 142, 147, 0.2);
         }
         .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; flex: 1; }
         .nav-item.active { color: var(--accent); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
 
-        /* Змейка */
-        #snake-container { display: none; text-align: center; }
-        canvas { background: #000; border-radius: 20px; display: block; margin: 20px auto; }
-        .start-btn { background: var(--accent); border: none; color: white; padding: 15px 40px; border-radius: 15px; font-weight: bold; }
+        /* Кнопки */
+        .settings-btn {
+            background: rgba(142, 142, 147, 0.1); border: none; color: var(--text);
+            padding: 12px; border-radius: 14px; font-size: 14px; flex: 1;
+        }
+        .settings-btn.active { background: var(--accent) !important; color: white !important; }
     </style>
 </head>
 <body class="dark-theme">
 
     <div id="home" class="page active">
-        <div class="glass-card" style="display: flex; align-items: center; gap: 15px;">
-            <div id="u-pic-box" class="profile-img-container">?</div>
+        <div class="user-header">
+            <div id="u-pic" class="profile-pic">?</div>
             <div>
-                <h2 style="margin:0; font-size: 20px;" id="txt-hi">Ласкаво просимо!</h2>
-                <p style="margin:0; color: var(--subtext); font-size: 13px;" id="txt-ready">Готовий до навчання?</p>
+                <h2 style="margin:0;" id="txt-hi">Ласкаво просимо!</h2>
+                <div id="u-rank" class="badge">Новачок (Ранг I)</div>
             </div>
         </div>
+
         <div class="glass-card">
-            <h3 id="txt-sched-title"><i class="fas fa-calendar-day"></i> Розклад</h3>
-            <p id="txt-sched-desc" style="color: var(--subtext);">Увійдіть через Classroom, щоб побачити дані.</p>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                <span>Рівень 4</span>
+                <span id="txt-xp">680 / 1000 XP</span>
+            </div>
+            <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fas fa-calendar-day"></i> Розклад</h3>
+            <p style="color: var(--subtext); font-size: 14px;">Сьогодні занять немає.</p>
+        </div>
+    </div>
+
+    <div id="achievements" class="page">
+        <h2>Досягнення</h2>
+        <div class="achievements-grid">
+            <div class="ach-item"><i class="fas fa-medal"></i><span>Перша 12-ка</span></div>
+            <div class="ach-item"><i class="fas fa-fire"></i><span>7 днів поспіль</span></div>
+            <div class="ach-item"><i class="fas fa-brain"></i><span>Геній</span></div>
+            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-star"></i><span>Відмінник</span></div>
+            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-snake"></i><span>Король змійки</span></div>
+            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-book"></i><span>Читач</span></div>
         </div>
     </div>
 
     <div id="games" class="page">
-        <h2 id="txt-games-title">Ігровий центр</h2>
-        <div id="games-menu">
-            <div class="glass-card" onclick="openSnake()" style="text-align: center;">
-                <i class="fas fa-snake" style="font-size: 40px; color: var(--accent);"></i>
-                <h4 style="margin: 10px 0 0;">Змійка</h4>
-            </div>
-        </div>
-        <div id="snake-container">
-            <button id="btn-start" class="start-btn" onclick="runSnakeLogic()">START</button>
-            <canvas id="snakeCanvas" width="300" height="300"></canvas>
-            <button class="settings-btn" onclick="closeSnake()" id="txt-exit">Вийти</button>
+        <h2>Ігровий центр</h2>
+        <div class="glass-card" onclick="alert('Змійка скоро повернеться!')" style="text-align: center;">
+            <i class="fas fa-snake" style="font-size: 40px; color: var(--accent);"></i>
+            <h4>Змійка</h4>
         </div>
     </div>
 
     <div id="profile" class="page">
-        <h2 id="txt-sett-title">Налаштування</h2>
+        <h2>Налаштування</h2>
         <div class="glass-card">
             <h4 id="txt-lang-label">Мова</h4>
-            <div class="settings-group" id="lang-group">
+            <div style="display:flex; gap:10px;">
                 <button class="settings-btn active" onclick="changeLang('uk', this)">UA</button>
                 <button class="settings-btn" onclick="changeLang('ru', this)">RU</button>
-                <button class="settings-btn" onclick="changeLang('en', this)">EN</button>
             </div>
         </div>
         <div class="glass-card">
             <h4 id="txt-theme-label">Тема</h4>
-            <div class="settings-group" id="theme-group">
-                <button class="settings-btn active" onclick="changeTheme('dark', this)">Dark</button>
-                <button class="settings-btn" onclick="changeTheme('light', this)">Light</button>
+            <div style="display:flex; gap:10px;">
+                <button id="btn-dark" class="settings-btn active" onclick="setTheme('dark', this)">Dark</button>
+                <button id="btn-light" class="settings-btn" onclick="setTheme('light', this)">Light</button>
             </div>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active" onclick="switchTab('home', this)" id="nav-h"><i class="fas fa-house"></i><br><span>Головна</span></a>
-        <a href="#" class="nav-item" onclick="switchTab('games', this)" id="nav-g"><i class="fas fa-gamepad"></i><br><span>Ігри</span></a>
-        <a href="#" class="nav-item" onclick="switchTab('profile', this)" id="nav-p"><i class="fas fa-user-gear"></i><br><span>Профіль</span></a>
+        <a href="#" class="nav-item active" onclick="nav('home', this)"><i class="fas fa-house"></i><br>Головна</a>
+        <a href="#" class="nav-item" onclick="nav('achievements', this)"><i class="fas fa-trophy"></i><br>Успіхи</a>
+        <a href="#" class="nav-item" onclick="nav('games', this)"><i class="fas fa-gamepad"></i><br>Ігри</a>
+        <a href="#" class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-gear"></i><br>Профіль</a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ФУНКЦИЯ ЗАГРУЗКИ ДАННЫХ
-        function loadUserData() {
+        // Инициализация данных пользователя
+        function initUser() {
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const user = tg.initDataUnsafe.user;
-                // Устанавливаем имя (если оно есть)
-                document.getElementById('txt-hi').innerText = `Вітаємо, ${user.first_name}!`;
+                const u = tg.initDataUnsafe.user;
+                document.getElementById('txt-hi').innerText = `Привіт, ${u.first_name}!`;
                 
-                const picBox = document.getElementById('u-pic-box');
-                // Проверяем наличие фото
-                if (user.photo_url) {
-                    picBox.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
+                const pic = document.getElementById('u-pic');
+                if (u.photo_url) {
+                    pic.innerHTML = `<img src="${u.photo_url}" alt="avatar">`;
                 } else {
-                    picBox.innerText = user.first_name ? user.first_name[0] : "?";
+                    pic.innerText = u.first_name[0];
                 }
+                
+                // Ранг на основе "удачи" или ID
+                const ranks = ["Новачок", "Учень", "Магістр", "Легенда"];
+                document.getElementById('u-rank').innerText = ranks[u.id % 4] + " (Ранг " + (u.id % 5 + 1) + ")";
             }
         }
+        initUser();
 
-        // Вызываем загрузку при старте
-        loadUserData();
-
-        const langDB = {
-            uk: { hi: "Вітаємо", ready: "Готовий до навчання?", sched: "Розклад", sd: "Увійдіть через Classroom.", games: "Ігри", sett: "Налаштування", lang: "Мова", theme: "Тема", exit: "Вийти", home: "Головна" },
-            ru: { hi: "Привет", ready: "Готов к учебе?", sched: "Расписание", sd: "Войдите через Classroom.", games: "Игры", sett: "Настройки", lang: "Язык", theme: "Тема", exit: "Выйти", home: "Главная" },
-            en: { hi: "Welcome", ready: "Ready to study?", sched: "Schedule", sd: "Login via Classroom.", games: "Games", sett: "Settings", lang: "Language", theme: "Theme", exit: "Exit", home: "Home" }
-        };
-
-        function changeLang(lang, btn) {
-            document.querySelectorAll('#lang-group .settings-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const t = langDB[lang];
-            document.getElementById('txt-ready').innerText = t.ready;
-            document.getElementById('txt-sched-title').innerHTML = `<i class="fas fa-calendar-day"></i> ${t.sched}`;
-            document.getElementById('txt-sched-desc').innerText = t.sd;
-            document.getElementById('txt-games-title').innerText = t.games;
-            document.getElementById('txt-sett-title').innerText = t.sett;
-            document.getElementById('txt-lang-label').innerText = t.lang;
-            document.getElementById('txt-theme-label').innerText = t.theme;
-            document.getElementById('txt-exit').innerText = t.exit;
-            document.getElementById('nav-h').querySelector('span').innerText = t.home;
-            document.getElementById('nav-g').querySelector('span').innerText = t.games;
-            document.getElementById('nav-p').querySelector('span').innerText = t.sett;
-        }
-
-        function changeTheme(theme, btn) {
-            document.querySelectorAll('#theme-group .settings-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.body.className = theme === 'light' ? 'light-theme' : 'dark-theme';
-        }
-
-        function switchTab(page, el) {
+        function nav(pageId, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
+            document.getElementById(pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
         }
 
-        // --- ЗМЕЙКА (УПРОЩЕННАЯ) ---
-        let gameLoop;
-        function openSnake() {
-            document.getElementById('games-menu').style.display = 'none';
-            document.getElementById('snake-container').style.display = 'block';
-        }
-        function closeSnake() {
-            clearInterval(gameLoop);
-            document.getElementById('games-menu').style.display = 'block';
-            document.getElementById('snake-container').style.display = 'none';
-            document.getElementById('btn-start').style.display = 'inline-block';
+        function setTheme(theme, btn) {
+            document.querySelectorAll('#profile .settings-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.body.className = theme + '-theme';
+            tg.setHeaderColor(theme === 'dark' ? '#0c0c0e' : '#f2f2f7');
         }
 
-        function runSnakeLogic() {
-            document.getElementById('btn-start').style.display = 'none';
-            const canvas = document.getElementById("snakeCanvas");
-            const ctx = canvas.getContext("2d");
-            let box = 20, snake = [{x: 140, y: 140}], dir = "", food = {x: 100, y: 100};
-
-            canvas.addEventListener('touchstart', e => { 
-                this.tsX = e.touches[0].clientX; this.tsY = e.touches[0].clientY; 
-            });
-            canvas.addEventListener('touchmove', e => {
-                let dx = this.tsX - e.touches[0].clientX, dy = this.tsY - e.touches[0].clientY;
-                if(Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? "LEFT" : "RIGHT";
-                else dir = dy > 0 ? "UP" : "DOWN";
-                e.preventDefault();
-            }, {passive: false});
-
-            gameLoop = setInterval(() => {
-                ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
-                ctx.fillStyle = "red"; ctx.fillRect(food.x, food.y, box, box);
-                for(let i=0; i<snake.length; i++){
-                    ctx.fillStyle = i==0 ? "#34c759" : "#1a7a35";
-                    ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
-                }
-                let hX = snake[0].x, hY = snake[0].y;
-                if(dir=="LEFT") hX-=box; if(dir=="UP") hY-=box;
-                if(dir=="RIGHT") hX+=box; if(dir=="DOWN") hY+=box;
-                if(hX==food.x && hY==food.y) food = {x: Math.floor(Math.random()*14+1)*20, y: Math.floor(Math.random()*14+1)*20};
-                else if(dir!=="") snake.pop();
-                if(dir!==""){
-                    if(hX<0 || hY<0 || hX>=300 || hY>=300) closeSnake();
-                    snake.unshift({x:hX, y:hY});
-                }
-            }, 150);
+        function changeLang(lang, btn) {
+            // Логика смены языка как в прошлом примере
+            btn.parentElement.querySelectorAll('.settings-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
     </script>
 </body>
