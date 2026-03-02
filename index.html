@@ -3,245 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study App</title>
+    <title>Study UA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #000;
+            --bg: #0c0c0e;
             --card: #1c1c1e;
             --accent: #34c759;
-            --text: #fff;
-            --secondary: #8e8e93;
+            --text: #ffffff;
+            --subtext: #8e8e93;
+        }
+
+        /* Светлая тема */
+        body.light-theme {
+            --bg: #f2f2f7;
+            --card: #ffffff;
+            --text: #000000;
+            --subtext: #3a3a3c;
         }
 
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: -apple-system, system-ui, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0;
+            transition: all 0.3s ease;
         }
 
-        .page { display: none; padding: 15px; padding-bottom: 100px; }
+        .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
 
-        /* Шапка */
-        .user-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--card);
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-        }
-        .user-avatar {
-            width: 45px; height: 45px;
-            background: var(--accent);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: bold;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Кнопки и Карточки */
-        .card {
+        /* Стеклянная шапка */
+        .glass-card {
             background: var(--card);
-            border-radius: 18px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* Список игр */
-        .game-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .game-card {
-            background: var(--card);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
             padding: 20px;
-            border-radius: 18px;
-            text-align: center;
-            border: 1px solid #333;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .game-card i { font-size: 30px; color: var(--accent); margin-bottom: 10px; }
 
-        /* Змейка (скрыта по умолчанию) */
-        #snake-engine { display: none; text-align: center; }
-        canvas { background: #111; border: 2px solid #333; border-radius: 8px; margin-top: 10px; }
+        .profile-img {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
 
-        /* Профиль */
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
+        /* Кнопки настроек */
+        .settings-btn {
+            background: rgba(142, 142, 147, 0.1);
+            border: none;
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .settings-btn.active { background: var(--accent); color: white; }
+
+        /* Сетка игр */
+        .game-item {
+            background: linear-gradient(145deg, var(--card), #2c2c2e);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* Навигация */
-        .nav {
+        .nav-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0 25px;
-            border-top: 1px solid #333;
-            z-index: 100;
+            padding: 12px 0 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
-        .nav-link {
-            color: var(--secondary);
-            text-decoration: none;
-            font-size: 11px;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .nav-link.active { color: var(--accent); }
+        .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+
+        canvas { border-radius: 15px; box-shadow: 0 0 20px rgba(52, 199, 89, 0.2); }
     </style>
 </head>
-<body>
+<body class="dark-theme">
 
     <div id="home" class="page active">
-        <div class="user-bar">
-            <div class="user-avatar" id="u-pic">?</div>
+        <div class="glass-card" style="display: flex; align-items: center; gap: 15px;">
+            <img id="user-photo" src="" class="profile-img" style="display:none;">
+            <div id="user-avatar-placeholder" class="profile-img" style="background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">?</div>
             <div>
-                <div id="u-name" style="font-weight: 600;">Завантаження...</div>
-                <div style="font-size: 11px; color: var(--accent);">● Онлайн</div>
+                <h2 style="margin:0; font-size: 20px;" id="welcome-name">Вітаємо!</h2>
+                <p style="margin:0; color: var(--subtext); font-size: 13px;">Готовий до навчання?</p>
             </div>
         </div>
         
-        <div class="card">
-            <h3>📖 Сьогоднішні завдання</h3>
-            <p style="color: var(--secondary); font-size: 14px;">Тут з'являться твої домашки після входу в Classroom.</p>
+        <div class="glass-card">
+            <h3 style="margin-top:0"><i class="fas fa-calendar-day"></i> Розклад</h3>
+            <p style="color: var(--subtext);">Увійдіть через Classroom, щоб побачити розклад.</p>
         </div>
     </div>
 
     <div id="games" class="page">
-        <h2>🎮 Центр ігор</h2>
-        
-        <div id="games-list" class="game-grid">
-            <div class="game-card" onclick="startSnake()">
-                <i class="fas fa-snake"></i>
-                <div>Змійка</div>
-            </div>
-            <div class="game-card" style="opacity: 0.5;">
-                <i class="fas fa-question"></i>
-                <div>Скоро...</div>
+        <h2 style="margin-left: 10px;">Ігровий центр</h2>
+        <div id="games-menu" class="game-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="game-item" onclick="launchSnake()">
+                <i class="fas fa-snake" style="font-size: 40px; color: var(--accent);"></i>
+                <h4 style="margin: 10px 0 0;">Змійка</h4>
             </div>
         </div>
 
-        <div id="snake-engine">
-            <button onclick="stopGame()" style="background: none; color: var(--accent); border: 1px solid var(--accent); padding: 5px 15px; border-radius: 10px; margin-bottom: 10px;">⬅ Назад</button>
-            <canvas id="snake" width="280" height="280"></canvas>
+        <div id="snake-game" style="display: none; text-align: center;">
+            <div class="glass-card">
+                <canvas id="snakeCanvas" width="300" height="300"></canvas>
+                <div style="margin-top: 15px;">
+                    <button class="settings-btn" onclick="exitGame()">Закрити гру</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="profile" class="page">
-        <h2>👤 Мій профіль</h2>
-        <div class="card" style="text-align: center;">
-            <div class="user-avatar" id="p-pic" style="width: 70px; height: 70px; margin: 0 auto 10px; font-size: 30px;">?</div>
-            <h3 id="p-name">Користувач</h3>
+        <h2>Налаштування</h2>
+        
+        <div class="glass-card">
+            <h4><i class="fas fa-language"></i> Мова</h4>
+            <button class="settings-btn active">Українська</button>
+            <button class="settings-btn">Русский</button>
+            <button class="settings-btn">English</button>
         </div>
 
-        <div class="card">
-            <div class="stat-row"><span>🔥 Рекорд у Змійці</span><span id="high-score">0</span></div>
-            <div class="stat-row"><span>📅 Дата реєстрації</span><span>Сьогодні</span></div>
-            <div class="stat-row"><span>🌍 Мова</span><span>Українська</span></div>
+        <div class="glass-card">
+            <h4><i class="fas fa-paint-roller"></i> Тема</h4>
+            <button class="settings-btn" onclick="setTheme('system')">Системна</button>
+            <button class="settings-btn active" onclick="setTheme('dark')">Темна</button>
+            <button class="settings-btn" onclick="setTheme('light')">Світла</button>
         </div>
 
-        <button onclick="tg.close()" style="width: 100%; background: #ff3b30; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold;">Вийти з додатка</button>
+        <button onclick="tg.close()" style="width:100%; background:#ff3b30; border:none; color:white; padding:18px; border-radius:18px; font-weight:bold; font-size:16px;">
+            Вийти з аккаунта
+        </button>
     </div>
 
-    <nav class="nav">
-        <a href="javascript:void(0)" class="nav-link active" onclick="showPage('home', this)"><i class="fas fa-house"></i><br>Головна</a>
-        <a href="javascript:void(0)" class="nav-link" onclick="showPage('games', this)"><i class="fas fa-gamepad"></i><br>Ігри</a>
-        <a href="javascript:void(0)" class="nav-link" onclick="showPage('profile', this)"><i class="fas fa-user"></i><br>Профіль</a>
+    <nav class="nav-bar">
+        <a href="#" class="nav-item active" onclick="nav('home', this)"><i class="fas fa-house-chimney"></i><br>Головна</a>
+        <a href="#" class="nav-item" onclick="nav('games', this)"><i class="fas fa-gamepad"></i><br>Ігри</a>
+        <a href="#" class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-gear"></i><br>Профіль</a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Переключение страниц
-        function showPage(pageId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            el.classList.add('active');
-            
-            if(pageId !== 'games') stopGame();
-        }
-
-        // Данные пользователя
+        // Загрузка фото из Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
-            document.getElementById('u-name').innerText = user.first_name;
-            document.getElementById('p-name').innerText = user.first_name;
-            document.getElementById('u-pic').innerText = user.first_name[0];
-            document.getElementById('p-pic').innerText = user.first_name[0];
+            document.getElementById('welcome-name').innerText = user.first_name;
+            if (user.photo_url) {
+                document.getElementById('user-photo').src = user.photo_url;
+                document.getElementById('user-photo').style.display = 'block';
+                document.getElementById('user-avatar-placeholder').style.display = 'none';
+            } else {
+                document.getElementById('user-avatar-placeholder').innerText = user.first_name[0];
+            }
         }
 
-        // Логика Змейки
-        let gameInterval;
-        function startSnake() {
-            document.getElementById('games-list').style.display = 'none';
-            document.getElementById('snake-engine').style.display = 'block';
-            initSnake();
+        function nav(page, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            if (page !== 'games') exitGame();
         }
 
-        function stopGame() {
-            clearInterval(gameInterval);
-            document.getElementById('games-list').style.display = 'grid';
-            document.getElementById('snake-engine').style.display = 'none';
+        function setTheme(theme) {
+            if(theme === 'light') document.body.className = 'light-theme';
+            else document.body.className = 'dark-theme';
+            // В системной теме можно добавить проверку tg.colorScheme
         }
 
-        function initSnake() {
-            const canvas = document.getElementById("snake");
+        // --- ЗМЕЙКА С КАРТИНКАМИ ---
+        const foodImg = new Image();
+        foodImg.src = 'food.png'; // Загрузи картинку яблока в корень сайта!
+
+        let snakeInterval;
+        function launchSnake() {
+            document.getElementById('games-menu').style.display = 'none';
+            document.getElementById('snake-game').style.display = 'block';
+            runSnake();
+        }
+
+        function exitGame() {
+            clearInterval(snakeInterval);
+            document.getElementById('games-menu').style.display = 'grid';
+            document.getElementById('snake-game').style.display = 'none';
+        }
+
+        function runSnake() {
+            const canvas = document.getElementById("snakeCanvas");
             const ctx = canvas.getContext("2d");
-            const box = 20;
-            let snake = [{x: 8 * box, y: 10 * box}];
-            let food = { x: Math.floor(Math.random() * 14) * box, y: Math.floor(Math.random() * 14) * box };
-            let d;
+            let box = 20;
+            let snake = [{x: 10*box, y: 10*box}];
+            let food = {x: Math.floor(Math.random()*14+1)*box, y: Math.floor(Math.random()*14+1)*box};
+            let dir;
 
-            document.addEventListener("keydown", (e) => {
-                if(e.keyCode == 37 && d != "RIGHT") d = "LEFT";
-                else if(e.keyCode == 38 && d != "DOWN") d = "UP";
-                else if(e.keyCode == 39 && d != "LEFT") d = "RIGHT";
-                else if(e.keyCode == 40 && d != "UP") d = "DOWN";
+            document.addEventListener("keydown", e => {
+                if(e.keyCode==37 && dir!="RIGHT") dir="LEFT";
+                else if(e.keyCode==38 && dir!="DOWN") dir="UP";
+                else if(e.keyCode==39 && dir!="LEFT") dir="RIGHT";
+                else if(e.keyCode==40 && dir!="UP") dir="DOWN";
             });
 
-            gameInterval = setInterval(() => {
-                ctx.fillStyle = "#111";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                for(let i = 0; i < snake.length; i++) {
-                    ctx.fillStyle = i == 0 ? "#34c759" : "#1a7a35";
-                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                }
-                ctx.fillStyle = "#ff3b30";
-                ctx.fillRect(food.x, food.y, box, box);
+            snakeInterval = setInterval(() => {
+                ctx.clearRect(0,0,300,300);
                 
-                let snakeX = snake[0].x;
-                let snakeY = snake[0].y;
-                if( d == "LEFT") snakeX -= box;
-                if( d == "UP") snakeY -= box;
-                if( d == "RIGHT") snakeX += box;
-                if( d == "DOWN") snakeY += box;
+                // Рисуем еду (картинку или круг)
+                if (foodImg.complete) {
+                    ctx.drawImage(foodImg, food.x, food.y, box, box);
+                } else {
+                    ctx.fillStyle = "red";
+                    ctx.beginPath(); ctx.arc(food.x+10, food.y+10, 8, 0, Math.PI*2); ctx.fill();
+                }
 
-                if(snakeX == food.x && snakeY == food.y) {
-                    food = { x: Math.floor(Math.random() * 14) * box, y: Math.floor(Math.random() * 14) * box };
-                    let score = parseInt(document.getElementById('high-score').innerText);
-                    document.getElementById('high-score').innerText = score + 1;
+                for(let i=0; i<snake.length; i++) {
+                    ctx.fillStyle = i==0 ? "#34c759" : "#1a7a35";
+                    ctx.beginPath();
+                    ctx.roundRect(snake[i].x, snake[i].y, box-2, box-2, 5);
+                    ctx.fill();
+                }
+
+                let headX = snake[0].x; let headY = snake[0].y;
+                if(dir=="LEFT") headX -= box; if(dir=="UP") headY -= box;
+                if(dir=="RIGHT") headX += box; if(dir=="DOWN") headY += box;
+
+                if(headX==food.x && headY==food.y) {
+                    food = {x: Math.floor(Math.random()*14+1)*box, y: Math.floor(Math.random()*14+1)*box};
                 } else { snake.pop(); }
 
-                let newHead = {x: snakeX, y: snakeY};
-                if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height) {
-                    alert("Гра закінчена!");
-                    stopGame();
-                }
+                let newHead = {x: headX, y: headY};
+                if(headX<0 || headY<0 || headX>=300 || headY>=300) exitGame();
                 snake.unshift(newHead);
             }, 150);
         }
