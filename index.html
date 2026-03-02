@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study UA</title>
+    <title>Study App Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -16,6 +16,7 @@
         body {
             background: var(--bg); color: var(--text);
             font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
         .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
@@ -27,169 +28,191 @@
         }
         .profile-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
 
-        /* Кнопки налаштувань */
-        .settings-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        /* Настройки */
+        .settings-group { display: flex; gap: 8px; margin-top: 10px; }
         .settings-btn {
             background: rgba(142, 142, 147, 0.1); border: none; color: var(--text);
-            padding: 10px 15px; border-radius: 12px; font-size: 14px; flex: 1; min-width: 80px;
+            padding: 12px; border-radius: 14px; font-size: 14px; flex: 1; transition: 0.2s;
         }
         .settings-btn.active { background: var(--accent); color: white; font-weight: bold; }
 
-        .game-item { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        /* Змейка */
+        #snake-container { display: none; position: relative; }
+        canvas { background: #000; border-radius: 20px; display: block; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .game-controls { margin-top: 15px; color: var(--subtext); font-size: 12px; }
+        .start-btn { 
+            background: var(--accent); border: none; color: white; padding: 15px 40px; 
+            border-radius: 15px; font-weight: bold; font-size: 18px; margin-bottom: 10px;
+        }
 
+        /* Навигация */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(20px);
+            background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
             display: flex; justify-content: space-around; padding: 12px 0 30px; border-top: 1px solid rgba(255,255,255,0.05);
         }
         .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; }
         .nav-item.active { color: var(--accent); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
-
-        canvas { background: #000; border-radius: 15px; display: block; margin: 0 auto; touch-action: none; }
     </style>
 </head>
 <body class="dark-theme">
 
     <div id="home" class="page active">
         <div class="glass-card" style="display: flex; align-items: center; gap: 15px;">
-            <div id="user-avatar-placeholder" class="profile-img" style="background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">?</div>
+            <div id="u-pic" class="profile-img" style="background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">?</div>
             <div>
-                <h2 style="margin:0; font-size: 20px;" id="welcome-txt">Вітаємо!</h2>
-                <p style="margin:0; color: var(--subtext); font-size: 13px;" id="sub-welcome">Готовий до навчання?</p>
+                <h2 style="margin:0; font-size: 20px;" id="txt-hi">Вітаємо!</h2>
+                <p style="margin:0; color: var(--subtext); font-size: 13px;" id="txt-ready">Готовий до навчання?</p>
             </div>
         </div>
         <div class="glass-card">
-            <h3 id="schedule-title"><i class="fas fa-calendar-day"></i> Розклад</h3>
-            <p id="schedule-desc" style="color: var(--subtext);">Увійдіть через Classroom, щоб побачити дані.</p>
+            <h3 id="txt-sched-title"><i class="fas fa-calendar-day"></i> Розклад</h3>
+            <p id="txt-sched-desc" style="color: var(--subtext);">Увійдіть через Classroom, щоб побачити розклад.</p>
         </div>
     </div>
 
     <div id="games" class="page">
-        <h2 id="games-title">Ігровий центр</h2>
-        <div id="games-menu" class="game-grid" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-            <div class="game-item" onclick="launchSnake()">
+        <h2 id="txt-games-title">Ігровий центр</h2>
+        
+        <div id="games-menu">
+            <div class="glass-card" onclick="openSnake()" style="text-align: center; cursor: pointer;">
                 <i class="fas fa-snake" style="font-size: 40px; color: var(--accent);"></i>
                 <h4 style="margin: 10px 0 0;">Змійка</h4>
             </div>
         </div>
-        <div id="snake-game-box" style="display: none; text-align: center;">
+
+        <div id="snake-container" style="text-align: center;">
+            <button id="btn-start-snake" class="start-btn" onclick="startSnakeLogic()">START</button>
             <canvas id="snakeCanvas" width="300" height="300"></canvas>
-            <button class="settings-btn" onclick="exitGame()" style="margin-top:20px; width:100%" id="btn-exit-game">Вийти</button>
+            <div class="game-controls">
+                <p id="txt-hint">Використовуй свайпи (вгору, вниз, вліво, вправо)</p>
+                <button class="settings-btn" onclick="closeSnake()" id="txt-exit-game">Вийти</button>
+            </div>
         </div>
     </div>
 
     <div id="profile" class="page">
-        <h2 id="settings-title">Налаштування</h2>
+        <h2 id="txt-settings">Налаштування</h2>
+        
         <div class="glass-card">
-            <h4 id="lang-label">Мова</h4>
+            <h4 id="txt-lang">Мова</h4>
             <div class="settings-group">
-                <button class="settings-btn lang-btn active" onclick="setLanguage('uk', this)">UA</button>
-                <button class="settings-btn lang-btn" onclick="setLanguage('ru', this)">RU</button>
-                <button class="settings-btn lang-btn" onclick="setLanguage('en', this)">EN</button>
+                <button id="lang-uk" class="settings-btn active" onclick="changeLang('uk')">UA</button>
+                <button id="lang-ru" class="settings-btn" onclick="changeLang('ru')">RU</button>
+                <button id="lang-en" class="settings-btn" onclick="changeLang('en')">EN</button>
             </div>
         </div>
+
         <div class="glass-card">
-            <h4 id="theme-label">Тема</h4>
+            <h4 id="txt-theme">Тема</h4>
             <div class="settings-group">
-                <button class="settings-btn theme-btn active" onclick="setTheme('dark', this)">Dark</button>
-                <button class="settings-btn theme-btn" onclick="setTheme('light', this)">Light</button>
+                <button id="theme-dark" class="settings-btn active" onclick="changeTheme('dark')">Dark</button>
+                <button id="theme-light" class="settings-btn" onclick="changeTheme('light')">Light</button>
             </div>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active" onclick="nav('home', this)" id="nav-home"><i class="fas fa-house"></i><br><span>Головна</span></a>
-        <a href="#" class="nav-item" onclick="nav('games', this)" id="nav-games"><i class="fas fa-gamepad"></i><br><span>Ігри</span></a>
-        <a href="#" class="nav-item" onclick="nav('profile', this)" id="nav-profile"><i class="fas fa-user"></i><br><span>Профіль</span></a>
+        <a href="#" id="nav-h" class="nav-item active" onclick="switchPage('home', this)"><i class="fas fa-house"></i><br><span>Головна</span></a>
+        <a href="#" id="nav-g" class="nav-item" onclick="switchPage('games', this)"><i class="fas fa-gamepad"></i><br><span>Ігри</span></a>
+        <a href="#" id="nav-p" class="nav-item" onclick="switchPage('profile', this)"><i class="fas fa-user-gear"></i><br><span>Профіль</span></a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. ПЕРЕКЛАД
-        const langData = {
-            uk: { welcome: "Вітаємо", sub: "Готовий до навчання?", schedule: "Розклад", sch_desc: "Увійдіть через Classroom.", games: "Ігри", settings: "Налаштування", lang: "Мова", theme: "Тема", exit: "Вийти", home: "Головна" },
-            ru: { welcome: "Привет", sub: "Готов к учебе?", schedule: "Расписание", sch_desc: "Войдите через Classroom.", games: "Игры", settings: "Настройки", lang: "Язык", theme: "Тема", exit: "Выйти", home: "Главная" },
-            en: { welcome: "Welcome", sub: "Ready to study?", schedule: "Schedule", sch_desc: "Login via Classroom.", games: "Games", settings: "Settings", lang: "Language", theme: "Theme", exit: "Exit", home: "Home" }
+        // 1. ПЕРЕВОДЫ
+        const translations = {
+            uk: { hi: "Вітаємо", ready: "Готовий до навчання?", sched: "Розклад", s_desc: "Увійдіть через Classroom.", games: "Ігри", sett: "Налаштування", lang: "Мова", theme: "Тема", exit: "Вийти", hint: "Керуй свайпами по екрану", home: "Головна" },
+            ru: { hi: "Привет", ready: "Готов к учебе?", sched: "Расписание", s_desc: "Войдите через Classroom.", games: "Игры", sett: "Настройки", lang: "Язык", theme: "Тема", exit: "Выйти", hint: "Управляй свайпами по экрану", home: "Главная" },
+            en: { hi: "Welcome", ready: "Ready to study?", sched: "Schedule", s_desc: "Login via Classroom.", games: "Games", sett: "Settings", lang: "Language", theme: "Theme", exit: "Exit", hint: "Use swipes to control", home: "Home" }
         };
 
-        function setLanguage(lang, btn) {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const d = langData[lang];
-            document.getElementById('welcome-txt').innerText = d.welcome + "!";
-            document.getElementById('sub-welcome').innerText = d.sub;
-            document.getElementById('schedule-title').innerHTML = `<i class="fas fa-calendar-day"></i> ${d.schedule}`;
-            document.getElementById('schedule-desc').innerText = d.sch_desc;
-            document.getElementById('games-title').innerText = d.games;
-            document.getElementById('settings-title').innerText = d.settings;
-            document.getElementById('lang-label').innerText = d.lang;
-            document.getElementById('theme-label').innerText = d.theme;
-            document.getElementById('btn-exit-game').innerText = d.exit;
-            document.getElementById('nav-home').querySelector('span').innerText = d.home;
-            document.getElementById('nav-games').querySelector('span').innerText = d.games;
-            document.getElementById('nav-profile').querySelector('span').innerText = d.settings;
+        function changeLang(lang) {
+            // Переключаем кнопки
+            document.querySelectorAll('[id^="lang-"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            
+            // Меняем тексты
+            const t = translations[lang];
+            document.getElementById('txt-hi').innerText = t.hi + "!";
+            document.getElementById('txt-ready').innerText = t.ready;
+            document.getElementById('txt-sched-title').innerHTML = `<i class="fas fa-calendar-day"></i> ${t.sched}`;
+            document.getElementById('txt-sched-desc').innerText = t.s_desc;
+            document.getElementById('txt-games-title').innerText = t.games;
+            document.getElementById('txt-settings').innerText = t.sett;
+            document.getElementById('txt-lang').innerText = t.lang;
+            document.getElementById('txt-theme').innerText = t.theme;
+            document.getElementById('txt-exit-game').innerText = t.exit;
+            document.getElementById('txt-hint').innerText = t.hint;
+            document.getElementById('nav-h').querySelector('span').innerText = t.home;
+            document.getElementById('nav-g').querySelector('span').innerText = t.games;
+            document.getElementById('nav-p').querySelector('span').innerText = t.sett;
         }
 
-        // 2. ТЕМИ
-        function setTheme(theme, btn) {
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // 2. ТЕМЫ
+        function changeTheme(theme) {
+            document.querySelectorAll('[id^="theme-"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('theme-' + theme).classList.add('active');
             document.body.className = theme === 'light' ? 'light-theme' : 'dark-theme';
         }
 
-        // 3. НАВІГАЦІЯ
-        function nav(page, el) {
+        // 3. НАВИГАЦИЯ
+        function switchPage(page, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(page).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            if (page !== 'games') exitGame();
+            if (page !== 'games') closeSnake();
         }
 
-        // 4. ДАНІ ТЕЛЕГРАМ
+        // 4. ТЕЛЕГРАМ ДАННЫЕ
         if (tg.initDataUnsafe?.user) {
             const user = tg.initDataUnsafe.user;
-            document.getElementById('welcome-txt').innerText = `Вітаємо, ${user.first_name}!`;
-            document.getElementById('user-avatar-placeholder').innerText = user.first_name[0];
+            document.getElementById('txt-hi').innerText = `Вітаємо, ${user.first_name}!`;
+            document.getElementById('u-pic').innerText = user.first_name[0];
         }
 
-        // 5. ЗМІЙКА
-        let snakeInterval;
-        function launchSnake() {
+        // 5. ЗМЕЙКА ЛОГИКА
+        let gameTicker;
+        function openSnake() {
             document.getElementById('games-menu').style.display = 'none';
-            document.getElementById('snake-game-box').style.display = 'block';
-            runSnake();
+            document.getElementById('snake-container').style.display = 'block';
         }
-        function exitGame() {
-            clearInterval(snakeInterval);
-            document.getElementById('games-menu').style.display = 'grid';
-            document.getElementById('snake-game-box').style.display = 'none';
+        function closeSnake() {
+            clearInterval(gameTicker);
+            document.getElementById('games-menu').style.display = 'block';
+            document.getElementById('snake-container').style.display = 'none';
+            document.getElementById('btn-start-snake').style.display = 'inline-block';
         }
 
-        function runSnake() {
+        function startSnakeLogic() {
+            document.getElementById('btn-start-snake').style.display = 'none';
             const canvas = document.getElementById("snakeCanvas");
             const ctx = canvas.getContext("2d");
-            let box = 20, dir, score = 0;
-            let snake = [{x: 140, y: 140}];
+            let box = 20, snake = [{x: 140, y: 140}], dir = "", score = 0;
             let food = {x: Math.floor(Math.random()*14+1)*20, y: Math.floor(Math.random()*14+1)*20};
 
-            // Керування (свайпи)
-            let touchX, touchY;
-            canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; });
+            // Свайпы
+            let startX, startY;
+            canvas.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, false);
             canvas.addEventListener('touchmove', e => {
-                let dx = e.touches[0].clientX - touchX, dy = e.touches[0].clientY - touchY;
-                if (Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? "RIGHT" : "LEFT";
-                else dir = dy > 0 ? "DOWN" : "UP";
+                if (!startX || !startY) return;
+                let diffX = startX - e.touches[0].clientX, diffY = startY - e.touches[0].clientY;
+                if (Math.abs(diffX) > Math.abs(diffY)) dir = diffX > 0 ? "LEFT" : "RIGHT";
+                else dir = diffY > 0 ? "UP" : "DOWN";
                 e.preventDefault();
             }, {passive: false});
 
-            snakeInterval = setInterval(() => {
+            gameTicker = setInterval(() => {
                 ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
-                ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(food.x+10, food.y+10, 8, 0, Math.PI*2); ctx.fill();
+                
+                // Еда
+                ctx.fillStyle = "#ff3b30"; ctx.beginPath(); ctx.arc(food.x+10, food.y+10, 8, 0, Math.PI*2); ctx.fill();
 
+                // Змейка
                 for(let i=0; i<snake.length; i++) {
                     ctx.fillStyle = i==0 ? "#34c759" : "#1a7a35";
                     ctx.fillRect(snake[i].x, snake[i].y, box-2, box-2);
@@ -201,10 +224,14 @@
 
                 if(hX==food.x && hY==food.y) {
                     food = {x: Math.floor(Math.random()*14+1)*20, y: Math.floor(Math.random()*14+1)*20};
-                } else { snake.pop(); }
+                } else if (dir !== "") { snake.pop(); }
 
-                if(hX<0 || hY<0 || hX>=300 || hY>=300) exitGame();
-                snake.unshift({x: hX, y: hY});
+                if (dir !== "") {
+                    if(hX<0 || hY<0 || hX>=300 || hY>=300 || snake.some((s,idx)=>idx!==0 && s.x===hX && s.y===hY)) {
+                        alert("Game Over!"); closeSnake();
+                    }
+                    snake.unshift({x: hX, y: hY});
+                }
             }, 150);
         }
     </script>
