@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NZ.UA Ultimate</title>
+    <title>NZ.UA Ultimate Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --bg: #000000; --card: #121212; --accent: #34c759;
-            --text: #ffffff; --sub: #8e8e93; --nav: rgba(18, 18, 18, 0.96);
-        }
-        body.light-theme {
-            --bg: #f2f2f7; --card: #ffffff; --text: #000000;
-            --sub: #636366; --nav: rgba(245, 245, 250, 0.96);
-        }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s; }
+        :root { --bg: #000000; --card: #121212; --accent: #34c759; --text: #ffffff; --sub: #8e8e93; --nav: rgba(18, 18, 18, 0.96); }
+        body.light-theme { --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #636366; --nav: rgba(245, 245, 250, 0.96); }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s; overflow-x: hidden; }
         
         .page { display: none; padding: 15px; padding-bottom: 120px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
@@ -24,97 +18,97 @@
         .nz-card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(142,142,147,0.1); }
         .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(142,142,147,0.1); }
         .stat-row:last-child { border-bottom: none; }
-        .stat-label { display: flex; align-items: center; gap: 12px; font-size: 15px; }
 
         /* Ранг Developer */
-        .rank-dev { background: linear-gradient(45deg, #ff3b30, #ff9500); color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .rank-dev { background: linear-gradient(45deg, #ff3b30, #ff9500); color: white; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
 
-        /* Кнопки вибору (Мова/Тема) */
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .s-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: rgba(142,142,147,0.1); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; }
+        /* Кнопки вибору */
+        .btn-group { display: flex; gap: 8px; margin-top: 10px; width: 100%; }
+        .s-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; background: rgba(142,142,147,0.1); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; }
         .s-btn.active { background: var(--accent) !important; color: white !important; }
 
         /* Досягнення */
         .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .ach-item { background: var(--card); padding: 15px 5px; border-radius: 16px; text-align: center; filter: grayscale(1); opacity: 0.4; transition: 0.4s; border: 1px solid transparent; }
         .ach-item.unlocked { filter: grayscale(0); opacity: 1; border-color: var(--accent); box-shadow: 0 5px 15px rgba(52,199,89,0.2); }
-        .ach-item i { font-size: 24px; color: #ffd700; margin-bottom: 5px; }
-        .ach-item span { font-size: 10px; font-weight: bold; display: block; }
+        .ach-item i { font-size: 26px; color: #ffd700; margin-bottom: 5px; display: block; }
+        .ach-item span { font-size: 10px; font-weight: 800; display: block; line-height: 1.2; }
 
         /* Навігація */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--nav); display: flex; padding: 10px 0 30px; border-top: 1px solid rgba(142,142,147,0.1); z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; color: var(--sub); text-decoration: none; font-size: 10px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: var(--nav); display: flex; padding: 10px 0 35px; border-top: 1px solid rgba(142,142,147,0.1); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; color: var(--sub); text-decoration: none; font-size: 10px; font-weight: 500; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; display: block; }
+        .nav-item i { font-size: 24px; margin-bottom: 4px; display: block; }
 
-        #modal-notif { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; }
-        .modal-box { background: var(--card); width: 85%; border-radius: 24px; padding: 20px; text-align: center; }
+        /* Модалка */
+        #modal-info { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--card); width: 80%; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid rgba(142,142,147,0.2); }
     </style>
 </head>
 <body class="dark-theme">
 
-    <div id="modal-notif" onclick="closeM()">
+    <div id="modal-info" onclick="closeM()">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <h3>🔔 Сповіщення</h3>
-            <p style="color:var(--sub); font-size:14px;">Нових сповіщень немає</p>
-            <button class="s-btn active" style="width:100%; margin-top:15px;" onclick="closeM()">Закрити</button>
+            <h3 id="m-title">Досягнення</h3>
+            <p id="m-desc" style="color:var(--sub); font-size:14px; margin-top:10px;"></p>
+            <button class="s-btn active" style="width:100%; margin-top:20px;" onclick="closeM()">Зрозуміло</button>
         </div>
     </div>
 
     <div id="p-profile" class="page active">
-        <div style="text-align:center; margin-bottom: 20px;">
-            <div id="u-pic" style="width:80px; height:80px; border-radius:50%; background:var(--accent); margin:0 auto 10px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:28px; color:white; border: 3px solid var(--accent);">?</div>
-            <h3 id="u-name" style="margin:0;">Користувач</h3>
-            <div id="u-rank-tag" style="margin-top:5px;"><span style="color:var(--sub); font-size:12px;">Учень</span></div>
+        <div style="text-align:center; margin-bottom: 25px; padding-top: 10px;">
+            <div id="u-pic" style="width:90px; height:90px; border-radius:50%; background:var(--accent); margin:0 auto 12px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:32px; color:white; border: 3px solid var(--accent); box-shadow: 0 10px 20px rgba(52,199,89,0.2);">?</div>
+            <h3 id="u-name" style="margin:0; font-size:22px;">Користувач</h3>
+            <div id="u-rank-tag" style="margin-top:8px;"><span style="color:var(--sub); font-size:13px; font-weight:600;">Учень</span></div>
         </div>
 
         <div class="nz-card">
-            <div class="stat-row"><div class="stat-label">🔥 Найкраща серія</div><div class="stat-value">4 днів</div></div>
-            <div class="stat-row"><div class="stat-label">📚 Предметів</div><div class="stat-value">19</div></div>
-            <div class="stat-row"><div class="stat-label">⭐ Відмінних оцінок</div><div class="stat-value">15</div></div>
+            <div class="stat-row"><span>🔥 Найкраща серія</span><span style="font-weight:bold;">4 днів</span></div>
+            <div class="stat-row"><span>📚 Предметів</span><span style="font-weight:bold;">19</span></div>
+            <div class="stat-row"><span>⭐ Відмінних оцінок</span><span style="font-weight:bold;">15</span></div>
         </div>
 
         <div class="nz-card">
-            <h4 style="margin-top:0;">Налаштування</h4>
-            <div class="stat-row" style="flex-direction:column; align-items:flex-start;">
-                <span style="font-size:14px;">Мова</span>
-                <div class="btn-group" style="width:100%;">
-                    <button id="lang-uk" class="s-btn active" onclick="changeL('uk')">UA</button>
-                    <button id="lang-en" class="s-btn" onclick="changeL('en')">EN</button>
+            <h4 style="margin: 0 0 15px 0;">Налаштування</h4>
+            <div style="margin-bottom: 15px;">
+                <span style="font-size:14px; color:var(--sub);">Мова додатка</span>
+                <div class="btn-group">
+                    <button id="lang-uk" class="s-btn active" onclick="changeL('uk')">Українська</button>
+                    <button id="lang-en" class="s-btn" onclick="changeL('en')">English</button>
                 </div>
             </div>
-            <div class="stat-row" style="flex-direction:column; align-items:flex-start;">
-                <span style="font-size:14px;">Тема</span>
-                <div class="btn-group" style="width:100%;">
-                    <button id="theme-dark" class="s-btn active" onclick="changeT('dark')">Dark</button>
-                    <button id="theme-light" class="s-btn" onclick="changeT('light')">Light</button>
+            <div>
+                <span style="font-size:14px; color:var(--sub);">Тема інтерфейсу</span>
+                <div class="btn-group">
+                    <button id="theme-dark" class="s-btn active" onclick="changeT('dark')">Темна</button>
+                    <button id="theme-light" class="s-btn" onclick="changeT('light')">Світла</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="p-ach" class="page">
-        <h3>🏆 Досягнення</h3>
+        <h3 style="margin-bottom:20px;">🏆 Твої успіхи</h3>
         <div class="ach-grid">
-            <div id="ach-1" class="ach-item" onclick="showInfo('Новачок', 'Видається при першому вході')"><i class="fas fa-seedling"></i><span>Новачок</span></div>
-            <div id="ach-2" class="ach-item" onclick="showInfo('Поліглот', 'Змініть мову додатка')"><i class="fas fa-language"></i><span>Поліглот</span></div>
-            <div id="ach-3" class="ach-item" onclick="showInfo('Дизайнер', 'Змініть тему додатка')"><i class="fas fa-paint-brush"></i><span>Дизайнер</span></div>
-            <div id="ach-4" class="ach-item" onclick="showInfo('Легенда', 'Досягніть найвищого рангу')"><i class="fas fa-crown"></i><span>Легенда</span></div>
+            <div id="ach-1" class="ach-item" onclick="openM('Новачок', 'Видається автоматично при першому вході в систему Study UA.')"><i class="fas fa-seedling"></i><span>Новачок</span></div>
+            <div id="ach-2" class="ach-item" onclick="openM('Поліглот', 'Змініть мову інтерфейсу в налаштуваннях профілю.')"><i class="fas fa-language"></i><span>Поліглот</span></div>
+            <div id="ach-3" class="ach-item" onclick="openM('Дизайнер', 'Змініть тему оформлення з темної на світлу або навпаки.')"><i class="fas fa-paint-brush"></i><span>Дизайнер</span></div>
+            <div id="ach-4" class="ach-item" onclick="openM('Легенда', 'Видається розробникам та найактивнішим користувачам.')"><i class="fas fa-crown"></i><span>Легенда</span></div>
         </div>
     </div>
 
     <div id="p-admin" class="page">
-        <h3 style="color:#ff3b30">🛡 Developer Panel</h3>
+        <h3 style="color:#ff3b30"><i class="fas fa-user-shield"></i> Developer Panel</h3>
         <div class="nz-card">
-            <button class="s-btn active" style="width:100%; margin-bottom:10px;" onclick="unlockAll()">Розблокувати все</button>
-            <button class="s-btn" style="width:100%; color:#ff3b30;" onclick="clearAll()">Скинути прогрес</button>
+            <p style="font-size:14px; margin-bottom:15px;">Керування профілем розробника:</p>
+            <button class="s-btn active" style="width:100%; margin-bottom:10px;" onclick="unlockAll()">Розблокувати всі успіхи</button>
+            <button class="s-btn" style="width:100%; color:#ff3b30; background: rgba(255,59,48,0.1);" onclick="clearAll()">Скинути локальні дані</button>
         </div>
     </div>
 
     <nav class="nav-bar">
         <a href="#" class="nav-item active" onclick="nav('p-profile', this)"><i class="fas fa-user-circle"></i>Профіль</a>
         <a href="#" class="nav-item" onclick="nav('p-ach', this)"><i class="fas fa-trophy"></i>Успіхи</a>
-        <a href="#" class="nav-item" onclick="openM()"><i class="fas fa-bell"></i>Події</a>
         <a href="#" class="nav-item" id="nav-dev" style="display:none;" onclick="nav('p-admin', this)"><i class="fas fa-code"></i>Dev</a>
     </nav>
 
@@ -122,11 +116,12 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let state = JSON.parse(localStorage.getItem('nz_state')) || {
+        // Завантаження стану
+        let state = JSON.parse(localStorage.getItem('nz_final_state')) || {
             lang: 'uk', theme: 'dark', unlocked: [1]
         };
 
-        function save() { localStorage.setItem('nz_state', JSON.stringify(state)); }
+        function save() { localStorage.setItem('nz_final_state', JSON.stringify(state)); }
 
         function init() {
             if (tg.initDataUnsafe?.user) {
@@ -135,20 +130,27 @@
                 if(u.photo_url) document.getElementById('u-pic').innerHTML = `<img src="${u.photo_url}" style="width:100%;height:100%;object-fit:cover;">`;
                 else document.getElementById('u-pic').innerText = u.first_name[0];
 
+                // Перевірка ID адміна
                 if (u.id === 6439834001) {
                     document.getElementById('nav-dev').style.display = 'block';
                     document.getElementById('u-rank-tag').innerHTML = '<span class="rank-dev">DEVELOPER</span>';
                 }
             }
-            applyState();
+            applyUI(true);
         }
 
-        function applyState() {
-            // Тема
-            changeT(state.theme, true);
-            // Мова
-            changeL(state.lang, true);
-            // Досягнення
+        function applyUI(isInit = false) {
+            // Застосування теми
+            document.body.className = state.theme + '-theme';
+            document.querySelectorAll('[id^="theme-"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('theme-' + state.theme).classList.add('active');
+            tg.setHeaderColor(state.theme === 'dark' ? '#000000' : '#f2f2f7');
+
+            // Застосування мови
+            document.querySelectorAll('[id^="lang-"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('lang-' + state.lang).classList.add('active');
+
+            // Застосування досягнень
             state.unlocked.forEach(id => {
                 const el = document.getElementById('ach-' + id);
                 if(el) el.classList.add('unlocked');
@@ -163,41 +165,42 @@
             tg.HapticFeedback.selectionChanged();
         }
 
-        function changeL(l, init = false) {
-            state.lang = l;
-            document.querySelectorAll('[id^="lang-"]').forEach(b => b.classList.remove('active'));
-            document.getElementById('lang-' + l).classList.add('active');
-            if(!init) { unlockAch(2); save(); }
-        }
-
-        function changeT(t, init = false) {
-            state.theme = t;
-            document.body.className = t + '-theme';
-            document.querySelectorAll('[id^="theme-"]').forEach(b => b.classList.remove('active'));
-            document.getElementById('theme-' + t).classList.add('active');
-            tg.setHeaderColor(t === 'dark' ? '#000000' : '#f2f2f7');
-            if(!init) { unlockAch(3); save(); }
-        }
-
-        function showInfo(t, d) {
-            tg.HapticFeedback.impactOccurred('medium');
-            alert(`${t}\n\nУмова: ${d}`);
-        }
-
-        function unlockAch(id) {
-            if(!state.unlocked.includes(id)) {
-                state.unlocked.push(id);
-                const el = document.getElementById('ach-' + id);
-                if(el) el.classList.add('unlocked');
-                tg.HapticFeedback.notificationOccurred('success');
+        function changeL(l) {
+            if(state.lang !== l) {
+                state.lang = l;
+                unlockAch(2); // Даємо ачівку за зміну мови
+                applyUI();
                 save();
             }
         }
 
-        function unlockAll() { state.unlocked = [1,2,3,4]; applyState(); save(); }
+        function changeT(t) {
+            if(state.theme !== t) {
+                state.theme = t;
+                unlockAch(3); // Даємо ачівку за зміну теми
+                applyUI();
+                save();
+            }
+        }
+
+        function openM(title, desc) {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-desc').innerText = desc;
+            document.getElementById('modal-info').style.display = 'flex';
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeM() { document.getElementById('modal-info').style.display = 'none'; }
+
+        function unlockAch(id) {
+            if(!state.unlocked.includes(id)) {
+                state.unlocked.push(id);
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+
+        function unlockAll() { state.unlocked = [1,2,3,4]; applyUI(); save(); }
         function clearAll() { localStorage.clear(); location.reload(); }
-        function openM() { document.getElementById('modal-notif').style.display = 'flex'; }
-        function closeM() { document.getElementById('modal-notif').style.display = 'none'; }
 
         init();
     </script>
