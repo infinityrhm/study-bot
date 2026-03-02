@@ -8,141 +8,154 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #000000;
-            --card-bg: #1c1c1e;
+            --bg: #000;
+            --card: #1c1c1e;
             --accent: #34c759;
-            --text: #ffffff;
+            --text: #fff;
         }
 
         body {
-            background: var(--bg-color);
+            background: var(--bg);
             color: var(--text);
-            font-family: sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             margin: 0;
             padding: 15px;
-            padding-bottom: 80px;
+            overflow-x: hidden;
         }
 
-        .header {
+        /* Только профиль пользователя */
+        .user-bar {
             display: flex;
             align-items: center;
             gap: 12px;
-            background: var(--card-bg);
+            background: var(--card);
             padding: 15px;
-            border-radius: 18px;
+            border-radius: 16px;
             margin-bottom: 20px;
         }
 
-        .avatar {
-            width: 50px;
-            height: 50px;
+        .user-avatar {
+            width: 45px;
+            height: 45px;
             background: var(--accent);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
         }
 
-        .game-container {
-            background: var(--card-bg);
-            border-radius: 18px;
-            padding: 15px;
+        /* Контейнер для игр */
+        .game-section {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
         }
 
         canvas {
-            background: #000;
-            display: block;
-            margin: 10px auto;
+            background: #111;
             border: 2px solid #333;
+            border-radius: 8px;
+            display: block;
+            margin: 15px auto;
+            touch-action: none; /* Чтобы экран не дергался при игре */
         }
 
-        .nav-bar {
+        /* Нижнее меню */
+        .nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: #1c1c1e;
+            background: rgba(28, 28, 30, 0.95);
             display: flex;
             justify-content: space-around;
-            padding: 15px 0 25px;
+            padding: 10px 0 25px;
             border-top: 1px solid #333;
         }
 
-        .nav-item { color: #8e8e93; text-decoration: none; font-size: 12px; text-align: center; }
-        .nav-item.active { color: var(--accent); }
+        .nav-link {
+            color: #8e8e93;
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .nav-link.active { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="avatar" id="user-pic">?</div>
+    <div class="user-bar">
+        <div class="user-avatar" id="u-pic">?</div>
         <div>
-            <div id="user-name" style="font-weight: bold; font-size: 18px;">Завантаження...</div>
-            <div style="font-size: 12px; color: #34c759;">● Online</div>
+            <div id="u-name" style="font-weight: 600;">Завантаження...</div>
+            <div style="font-size: 11px; color: var(--accent);">● Онлайн</div>
         </div>
     </div>
 
-    <div class="game-container">
-        <h3>🐍 Гра "Змійка"</h3>
-        <canvas id="snakeGame" width="300" height="300"></canvas>
-        <p style="font-size: 12px; color: #8e8e93;">Керуй кнопками або свайпами</p>
+    <div class="game-section">
+        <h3 style="margin: 0;">🎮 Змійка</h3>
+        <canvas id="snake" width="280" height="280"></canvas>
+        <p style="font-size: 12px; color: #8e8e93;">Використовуй свайпи для керування</p>
     </div>
 
-    <nav class="nav-bar">
-        <a href="#" class="nav-item active"><i class="fas fa-home"></i><br>Головна</a>
-        <a href="#" class="nav-item"><i class="fas fa-book"></i><br>Предмети</a>
-        <a href="#" class="nav-item"><i class="fas fa-gamepad"></i><br>Ігри</a>
-        <a href="#" class="nav-item"><i class="fas fa-user"></i><br>Профіль</a>
+    <nav class="nav">
+        <a href="#" class="nav-link active"><i class="fas fa-th-large"></i><br>Головна</a>
+        <a href="#" class="nav-link"><i class="fas fa-gamepad"></i><br>Ігри</a>
+        <a href="#" class="nav-link"><i class="fas fa-user"></i><br>Профіль</a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Відображаємо реальні дані з Telegram
-        if (tg.initDataUnsafe.user) {
+        // Подтягиваем имя и аватарку из Telegram
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
-            document.getElementById('user-name').innerText = user.first_name;
-            document.getElementById('user-pic').innerText = user.first_name[0];
+            document.getElementById('u-name').innerText = user.first_name;
+            document.getElementById('u-pic').innerText = user.first_name[0];
         }
 
-        // --- ЛОГІКА ГРИ ЗМІЙКА ---
-        const canvas = document.getElementById("snakeGame");
+        // --- МИНИ-ИГРА ЗМЕЙКА ---
+        const canvas = document.getElementById("snake");
         const ctx = canvas.getContext("2d");
-        let box = 20;
-        let snake = [{x: 9 * box, y: 10 * box}];
-        let food = {x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box};
+        const box = 20;
+        let score = 0;
+        let snake = [{x: 8 * box, y: 10 * box}];
+        let food = { x: Math.floor(Math.random() * 14) * box, y: Math.floor(Math.random() * 14) * box };
         let d;
 
-        document.addEventListener("keydown", direction);
-        function direction(event) {
-            if(event.keyCode == 37 && d != "RIGHT") d = "LEFT";
-            else if(event.keyCode == 38 && d != "DOWN") d = "UP";
-            else if(event.keyCode == 39 && d != "LEFT") d = "RIGHT";
-            else if(event.keyCode == 40 && d != "UP") d = "DOWN";
-        }
+        document.addEventListener("keydown", (e) => {
+            if(e.keyCode == 37 && d != "RIGHT") d = "LEFT";
+            else if(e.keyCode == 38 && d != "DOWN") d = "UP";
+            else if(e.keyCode == 39 && d != "LEFT") d = "RIGHT";
+            else if(e.keyCode == 40 && d != "UP") d = "DOWN";
+        });
 
         function draw() {
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "#111";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             for(let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? "#34c759" : "white";
+                ctx.fillStyle = i == 0 ? "#34c759" : "#1a7a35";
                 ctx.fillRect(snake[i].x, snake[i].y, box, box);
             }
-            ctx.fillStyle = "red";
+            ctx.fillStyle = "#ff3b30";
             ctx.fillRect(food.x, food.y, box, box);
+            
             let snakeX = snake[0].x;
             let snakeY = snake[0].y;
             if( d == "LEFT") snakeX -= box;
             if( d == "UP") snakeY -= box;
             if( d == "RIGHT") snakeX += box;
             if( d == "DOWN") snakeY += box;
+
             if(snakeX == food.x && snakeY == food.y) {
-                food = {x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box};
+                food = { x: Math.floor(Math.random() * 14) * box, y: Math.floor(Math.random() * 14) * box };
             } else { snake.pop(); }
+
             let newHead = {x: snakeX, y: snakeY};
-            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height) clearInterval(game);
+            if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height) clearInterval(game);
             snake.unshift(newHead);
         }
         let game = setInterval(draw, 150);
