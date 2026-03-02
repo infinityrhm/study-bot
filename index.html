@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Study UA</title>
+    <title>Study UA Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -18,6 +18,7 @@
         body {
             background: var(--bg); color: var(--text);
             font-family: -apple-system, sans-serif; margin: 0; padding: 0; transition: 0.3s;
+            overflow-x: hidden;
         }
         .page { display: none; padding: 20px; padding-bottom: 110px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
@@ -28,159 +29,212 @@
             margin-bottom: 15px; border: 1px solid rgba(142, 142, 147, 0.1);
         }
 
-        /* Профиль и Аватар */
-        .user-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        /* Профіль */
+        .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; margin-bottom: 20px; }
         .profile-pic { 
-            width: 70px; height: 70px; border-radius: 50%; 
+            width: 90px; height: 90px; border-radius: 50%; 
             background: var(--accent); display: flex; align-items: center; 
-            justify-content: center; font-size: 28px; font-weight: bold; color: white;
-            overflow: hidden; border: 3px solid var(--accent);
+            justify-content: center; font-size: 36px; font-weight: bold; color: white;
+            overflow: hidden; border: 4px solid var(--accent); box-shadow: 0 0 20px rgba(52, 199, 89, 0.3);
         }
         .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
-        .badge { background: var(--accent); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        .user-nick { color: var(--accent); font-weight: bold; font-size: 14px; }
+        .badge { background: var(--accent); color: white; font-size: 12px; padding: 4px 12px; border-radius: 12px; margin-top: 5px; }
 
-        /* XP Bar */
-        .xp-container { margin-top: 10px; }
-        .xp-bar { width: 100%; height: 8px; background: rgba(142,142,147,0.2); border-radius: 4px; overflow: hidden; }
-        .xp-fill { width: 65%; height: 100%; background: var(--accent); }
+        /* Досягнення */
+        .achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .ach-item { 
+            background: var(--card); padding: 15px 10px; border-radius: 18px; 
+            text-align: center; border: 1px solid rgba(142,142,147,0.1);
+            filter: grayscale(1); opacity: 0.6; transition: 0.3s; position: relative;
+        }
+        .ach-item.unlocked { filter: grayscale(0); opacity: 1; border-color: var(--accent); box-shadow: 0 0 10px rgba(52,199,89,0.2); }
+        .ach-item i { font-size: 28px; color: #ffd700; margin-bottom: 8px; }
+        .ach-item span { font-size: 10px; display: block; font-weight: bold; }
 
-        /* Достижения */
-        .achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .ach-item { background: var(--card); padding: 10px; border-radius: 15px; text-align: center; border: 1px solid rgba(142,142,147,0.1); }
-        .ach-item i { font-size: 24px; color: #ffd700; margin-bottom: 5px; }
-        .ach-item span { font-size: 10px; display: block; color: var(--subtext); }
+        /* Підказка досягнень */
+        #ach-tooltip { 
+            position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 13px; font-weight: bold;
+            display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
 
-        /* Навигация (Исправлена для белой темы) */
+        /* Навігація */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--nav-bg); backdrop-filter: blur(20px);
             display: flex; justify-content: space-around; padding: 12px 0 30px; 
-            border-top: 1px solid rgba(142, 142, 147, 0.2);
+            border-top: 1px solid rgba(142, 142, 147, 0.2); z-index: 999;
         }
         .nav-item { color: var(--subtext); text-decoration: none; text-align: center; font-size: 11px; flex: 1; }
         .nav-item.active { color: var(--accent); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
 
-        /* Кнопки */
         .settings-btn {
             background: rgba(142, 142, 147, 0.1); border: none; color: var(--text);
-            padding: 12px; border-radius: 14px; font-size: 14px; flex: 1;
+            padding: 12px; border-radius: 14px; font-size: 14px; flex: 1; cursor: pointer;
         }
         .settings-btn.active { background: var(--accent) !important; color: white !important; }
+
+        .xp-bar { width: 100%; height: 10px; background: rgba(142,142,147,0.2); border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .xp-fill { width: 45%; height: 100%; background: var(--accent); transition: 1s; }
     </style>
 </head>
 <body class="dark-theme">
 
+    <div id="ach-tooltip">Підказка</div>
+
     <div id="home" class="page active">
-        <div class="user-header">
+        <div class="profile-header">
             <div id="u-pic" class="profile-pic">?</div>
             <div>
-                <h2 style="margin:0;" id="txt-hi">Ласкаво просимо!</h2>
-                <div id="u-rank" class="badge">Новачок (Ранг I)</div>
+                <h2 id="u-name" style="margin:0;">Вітаємо!</h2>
+                <div id="u-username" class="user-nick">@username</div>
+                <div id="u-rank" class="badge">Завантаження...</div>
             </div>
         </div>
 
         <div class="glass-card">
-            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                <span>Рівень 4</span>
-                <span id="txt-xp">680 / 1000 XP</span>
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;">
+                <span id="txt-lvl">Рівень 4</span>
+                <span id="txt-xp-val">450 / 1000 XP</span>
             </div>
-            <div class="xp-bar"><div class="xp-fill"></div></div>
+            <div class="xp-bar"><div class="xp-fill" style="width: 45%;"></div></div>
         </div>
 
         <div class="glass-card">
-            <h3><i class="fas fa-calendar-day"></i> Розклад</h3>
-            <p style="color: var(--subtext); font-size: 14px;">Сьогодні занять немає.</p>
+            <h3 id="txt-sch"><i class="fas fa-calendar-day"></i> Розклад</h3>
+            <p style="color: var(--subtext);" id="txt-sch-val">Сьогодні вихідний!</p>
         </div>
     </div>
 
     <div id="achievements" class="page">
-        <h2>Досягнення</h2>
+        <h2 id="txt-ach-title">Досягнення</h2>
         <div class="achievements-grid">
-            <div class="ach-item"><i class="fas fa-medal"></i><span>Перша 12-ка</span></div>
-            <div class="ach-item"><i class="fas fa-fire"></i><span>7 днів поспіль</span></div>
-            <div class="ach-item"><i class="fas fa-brain"></i><span>Геній</span></div>
-            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-star"></i><span>Відмінник</span></div>
-            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-snake"></i><span>Король змійки</span></div>
-            <div class="ach-item" style="opacity: 0.4;"><i class="fas fa-book"></i><span>Читач</span></div>
+            <div class="ach-item unlocked" onclick="showAch('Перший вхід в додаток!')">
+                <i class="fas fa-door-open"></i><span id="ach-1">Новачок</span>
+            </div>
+            <div class="ach-item" onclick="showAch('Отримай 5 оцінок 12 підряд')">
+                <i class="fas fa-bolt"></i><span id="ach-2">Відмінник</span>
+            </div>
+            <div class="ach-item" onclick="showAch('Набери 500 очок у Змійці')">
+                <i class="fas fa-snake"></i><span id="ach-3">Мисливець</span>
+            </div>
+            <div class="ach-item" onclick="showAch('Заходь в додаток 7 днів поспіль')">
+                <i class="fas fa-fire"></i><span id="ach-4">Активіст</span>
+            </div>
+            <div class="ach-item" onclick="showAch('Зміни тему на світлу і назад')">
+                <i class="fas fa-palette"></i><span id="ach-5">Дизайнер</span>
+            </div>
+            <div class="ach-item" onclick="showAch('Виконай всі завдання на тиждень')">
+                <i class="fas fa-graduation-cap"></i><span id="ach-6">Магістр</span>
+            </div>
         </div>
     </div>
 
     <div id="games" class="page">
-        <h2>Ігровий центр</h2>
-        <div class="glass-card" onclick="alert('Змійка скоро повернеться!')" style="text-align: center;">
-            <i class="fas fa-snake" style="font-size: 40px; color: var(--accent);"></i>
-            <h4>Змійка</h4>
+        <h2 id="txt-games">Ігри</h2>
+        <div class="glass-card" onclick="alert('Змійка оновлюється!')">
+            <i class="fas fa-gamepad" style="color:var(--accent)"></i> <b>Snake X</b>
         </div>
     </div>
 
     <div id="profile" class="page">
-        <h2>Налаштування</h2>
+        <h2 id="txt-sett">Налаштування</h2>
         <div class="glass-card">
-            <h4 id="txt-lang-label">Мова</h4>
+            <h4 id="txt-lang">Мова</h4>
             <div style="display:flex; gap:10px;">
-                <button class="settings-btn active" onclick="changeLang('uk', this)">UA</button>
-                <button class="settings-btn" onclick="changeLang('ru', this)">RU</button>
+                <button id="l-uk" class="settings-btn active" onclick="updateLang('uk')">UA</button>
+                <button id="l-ru" class="settings-btn" onclick="updateLang('ru')">RU</button>
+                <button id="l-en" class="settings-btn" onclick="updateLang('en')">EN</button>
             </div>
         </div>
         <div class="glass-card">
-            <h4 id="txt-theme-label">Тема</h4>
+            <h4 id="txt-theme">Тема</h4>
             <div style="display:flex; gap:10px;">
-                <button id="btn-dark" class="settings-btn active" onclick="setTheme('dark', this)">Dark</button>
-                <button id="btn-light" class="settings-btn" onclick="setTheme('light', this)">Light</button>
+                <button id="t-dark" class="settings-btn active" onclick="setTheme('dark')">Dark</button>
+                <button id="t-light" class="settings-btn" onclick="setTheme('light')">Light</button>
             </div>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-item active" onclick="nav('home', this)"><i class="fas fa-house"></i><br>Головна</a>
-        <a href="#" class="nav-item" onclick="nav('achievements', this)"><i class="fas fa-trophy"></i><br>Успіхи</a>
-        <a href="#" class="nav-item" onclick="nav('games', this)"><i class="fas fa-gamepad"></i><br>Ігри</a>
-        <a href="#" class="nav-item" onclick="nav('profile', this)"><i class="fas fa-user-gear"></i><br>Профіль</a>
+        <a href="#" class="nav-item active" onclick="nav('home', this)" id="nav-1"><i class="fas fa-user"></i><br><span>Профіль</span></a>
+        <a href="#" class="nav-item" onclick="nav('achievements', this)" id="nav-2"><i class="fas fa-trophy"></i><br><span>Успіхи</span></a>
+        <a href="#" class="nav-item" onclick="nav('games', this)" id="nav-3"><i class="fas fa-gamepad"></i><br><span>Ігри</span></a>
+        <a href="#" class="nav-item" onclick="nav('profile', this)" id="nav-4"><i class="fas fa-gear"></i><br><span>Опції</span></a>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Инициализация данных пользователя
-        function initUser() {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        // 1. ДАНІ ТЕЛЕГРАМ
+        function init() {
+            if (tg.initDataUnsafe?.user) {
                 const u = tg.initDataUnsafe.user;
-                document.getElementById('txt-hi').innerText = `Привіт, ${u.first_name}!`;
+                document.getElementById('u-name').innerText = u.first_name;
+                document.getElementById('u-username').innerText = u.username ? '@' + u.username : '';
                 
                 const pic = document.getElementById('u-pic');
-                if (u.photo_url) {
-                    pic.innerHTML = `<img src="${u.photo_url}" alt="avatar">`;
-                } else {
-                    pic.innerText = u.first_name[0];
-                }
-                
-                // Ранг на основе "удачи" или ID
-                const ranks = ["Новачок", "Учень", "Магістр", "Легенда"];
-                document.getElementById('u-rank').innerText = ranks[u.id % 4] + " (Ранг " + (u.id % 5 + 1) + ")";
+                if (u.photo_url) pic.innerHTML = `<img src="${u.photo_url}">`;
+                else pic.innerText = u.first_name[0];
+
+                const ranks = { uk: "Ранг: Учень", ru: "Ранг: Ученик", en: "Rank: Student" };
+                document.getElementById('u-rank').innerText = ranks.uk;
             }
         }
-        initUser();
+        init();
 
-        function nav(pageId, el) {
+        // 2. МОВА
+        const langData = {
+            uk: { sch: "Розклад", sch_v: "Сьогодні вихідний!", ach: "Досягнення", games: "Ігри", sett: "Налаштування", lang: "Мова", theme: "Тема", lvl: "Рівень 4", n1: "Профіль", n2: "Успіхи", n3: "Ігри", n4: "Опції", r: "Ранг: Учень" },
+            ru: { sch: "Расписание", sch_v: "Сегодня выходной!", ach: "Достижения", games: "Игры", sett: "Настройки", lang: "Язык", theme: "Тема", lvl: "Уровень 4", n1: "Профиль", n2: "Успехи", n3: "Игры", n4: "Опции", r: "Ранг: Ученик" },
+            en: { sch: "Schedule", sch_v: "Day off today!", ach: "Achievements", games: "Games", sett: "Settings", lang: "Language", theme: "Theme", lvl: "Level 4", n1: "Profile", n2: "Trophies", n3: "Games", n4: "Options", r: "Rank: Student" }
+        };
+
+        function updateLang(l) {
+            const d = langData[l];
+            document.getElementById('txt-sch').innerHTML = `<i class="fas fa-calendar-day"></i> ${d.sch}`;
+            document.getElementById('txt-sch-val').innerText = d.sch_v;
+            document.getElementById('txt-ach-title').innerText = d.ach;
+            document.getElementById('txt-games').innerText = d.games;
+            document.getElementById('txt-sett').innerText = d.sett;
+            document.getElementById('txt-lang').innerText = d.lang;
+            document.getElementById('txt-theme').innerText = d.theme;
+            document.getElementById('txt-lvl').innerText = d.lvl;
+            document.getElementById('u-rank').innerText = d.r;
+            document.getElementById('nav-1').querySelector('span').innerText = d.n1;
+            document.getElementById('nav-2').querySelector('span').innerText = d.n2;
+            document.getElementById('nav-3').querySelector('span').innerText = d.n3;
+            document.getElementById('nav-4').querySelector('span').innerText = d.n4;
+
+            document.querySelectorAll('#profile .settings-btn[onclick*="updateLang"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('l-'+l).classList.add('active');
+        }
+
+        // 3. ТЕМА ТА НАВІГАЦІЯ
+        function setTheme(t) {
+            document.body.className = t + '-theme';
+            document.querySelectorAll('[id^="t-"]').forEach(b => b.classList.remove('active'));
+            document.getElementById('t-'+t).classList.add('active');
+            tg.setHeaderColor(t === 'dark' ? '#0c0c0e' : '#f2f2f7');
+        }
+
+        function nav(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
         }
 
-        function setTheme(theme, btn) {
-            document.querySelectorAll('#profile .settings-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.body.className = theme + '-theme';
-            tg.setHeaderColor(theme === 'dark' ? '#0c0c0e' : '#f2f2f7');
-        }
-
-        function changeLang(lang, btn) {
-            // Логика смены языка как в прошлом примере
-            btn.parentElement.querySelectorAll('.settings-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // 4. ДОСЯГНЕННЯ ПІДКАЗКА
+        function showAch(text) {
+            const tip = document.getElementById('ach-tooltip');
+            tip.innerText = text;
+            tip.style.display = 'block';
+            setTimeout(() => { tip.style.display = 'none'; }, 2500);
         }
     </script>
 </body>
